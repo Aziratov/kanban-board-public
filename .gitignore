@@ -1,0 +1,18 @@
+# Data (tasks, agents, feed, runtime data)
+data/
+
+# Logs
+*.log
+server.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

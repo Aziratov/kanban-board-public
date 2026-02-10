@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis — Docs</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+            --border-color: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top Nav */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-status {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            margin-left: 24px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 6px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Main Content */
+        .docs-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Sidebar - Document List */
+        .docs-sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .docs-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .docs-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .docs-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .docs-search input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .docs-search input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .docs-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .doc-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .doc-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .doc-item.active {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-blue);
+        }
+
+        .doc-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .doc-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .doc-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .doc-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .doc-tag {
+            padding: 2px 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .doc-tag.system { color: var(--accent-blue); }
+        .doc-tag.guide { color: var(--accent-green); }
+        .doc-tag.reference { color: var(--accent-purple); }
+        .doc-tag.infra { color: var(--accent-yellow); }
+
+        /* Right Content Panel */
+        .docs-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .docs-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .docs-empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .docs-viewer {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: none;
+        }
+
+        .docs-viewer.active {
+            display: block;
+        }
+
+        .docs-viewer h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .docs-viewer h2 {
+            font-size: 1.5rem;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .docs-viewer h3 {
+            font-size: 1.1rem;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .docs-viewer p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .docs-viewer ul, .docs-viewer ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        .docs-viewer li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .docs-viewer code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .docs-viewer pre {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        .docs-viewer pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .docs-viewer table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .docs-viewer th, .docs-viewer td {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .docs-viewer th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .docs-viewer td {
+            color: var(--text-secondary);
+        }
+
+        .capability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .capability-card {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .capability-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .capability-card h4 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .capability-card p {
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .brain-link {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: var(--accent-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .brain-link:hover {
+            opacity: 0.85;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .docs-sidebar { width: 240px; }
+            .docs-viewer { padding: 24px; }
+            .docs-viewer h1 { font-size: 1.75rem; }
+            .docs-viewer h2 { font-size: 1.3rem; }
+            .capability-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        }
+
+        @media (max-width: 768px) {
+            .docs-layout { flex-direction: column; }
+            .docs-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                flex-direction: row;
+            }
+            .docs-header { display: none; }
+            .docs-list {
+                width: 100%;
+                overflow-x: auto;
+                overflow-y: hidden;
+                display: flex;
+                gap: 4px;
+                padding: 8px;
+                flex-direction: row;
+                max-height: 70px;
+            }
+            .doc-item {
+                padding: 8px 12px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                min-width: fit-content;
+            }
+            .doc-item.active { border-left: none; border-bottom: 2px solid var(--accent-blue); }
+            .doc-info { display: none; }
+            .doc-icon { font-size: 1rem; }
+            .docs-viewer { padding: 16px 12px; }
+            .docs-viewer h1 { font-size: 1.5rem; }
+            .capability-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+            .top-nav { padding: 8px 12px; flex-wrap: wrap; gap: 8px; }
+            .nav-tabs { gap: 4px; margin-left: auto; }
+            .nav-tab { padding: 6px 10px; font-size: 0.75rem; }
+        }
+
+        @media (max-width: 480px) {
+            .nav-brand { font-size: 1rem; }
+            .nav-tab { padding: 4px 8px; font-size: 0.7rem; }
+            .docs-viewer { padding: 12px; }
+            .docs-viewer h1 { font-size: 1.35rem; }
+            .capability-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Top Nav -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <a href="/" class="nav-brand">Jarvis</a>
+                <span class="nav-status"></span>
+                <div class="nav-tabs">
+                    <a href="/" class="nav-tab">Dashboard</a>
+                    <a href="/" class="nav-tab" onclick="localStorage.setItem('jarvis-tab','system')">System</a>
+                    <a href="/docs.html" class="nav-tab active">Docs</a>
+                    <a href="/memory.html" class="nav-tab">Memory</a>
+                    <a href="/" class="nav-tab" onclick="localStorage.setItem('jarvis-tab','log')">Log</a>
+                </div>
+            </div>
+            <div class="nav-right">
+                <a href="http://192.168.50.39:3333" target="_blank" class="brain-link" style="padding: 5px 12px; font-size: 0.8rem; margin: 0;">Open 2nd Brain</a>
+                <span id="syncTime">Last sync: --</span>
+            </div>
+        </nav>
+
+        <!-- Main Docs Layout -->
+        <div class="docs-layout">
+            <!-- Left Sidebar -->
+            <aside class="docs-sidebar">
+                <div class="docs-header">
+                    <div class="docs-title">Documents</div>
+                    <div class="docs-search">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" placeholder="Search documents...">
+                    </div>
+                </div>
+                <div class="docs-list" id="docsList"></div>
+            </aside>
+
+            <!-- Right Content -->
+            <main class="docs-content">
+                <div class="docs-empty" id="docsEmpty">
+                    <div class="docs-empty-icon">📄</div>
+                    <p>Select a document from the list</p>
+                </div>
+                <div class="docs-viewer" id="docsViewer"></div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const documents = [
+            {
+                id: 'about',
+                icon: '🤖',
+                name: 'About Jarvis',
+                date: 'Feb 8',
+                tag: 'System',
+                tagClass: 'system',
+                content: `
+                    <h1>About Jarvis</h1>
+                    <p>Your personal AI assistant. Automation, efficiency, and intelligence — at your service.</p>
+
+                    <h2>Mission</h2>
+                    <p>I'm here to be your force multiplier. Handle the tedious, track the important, and give you back time to focus on what actually matters. Think Tony Stark's workshop assistant — running on Claude Opus 4.6 via Claude Max subscription.</p>
+
+                    <h2>Capabilities</h2>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <div class="icon">📋</div>
+                            <h4>Task Management</h4>
+                            <p>Kanban board with drag-and-drop, priority filtering, keyboard shortcuts.</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="icon">💬</div>
+                            <h4>Telegram</h4>
+                            <p>Chat with me anytime via OpenClaw gateway.</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="icon">🧠</div>
+                            <h4>2nd Brain</h4>
+                            <p>Living knowledge base — journals, concepts, projects. Auto-updated daily.</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="icon">🔍</div>
+                            <h4>Research</h4>
+                            <p>Web search, content analysis, deep-dive investigations.</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="icon">💻</div>
+                            <h4>Code</h4>
+                            <p>Write, review, debug, deploy. Full system access.</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="icon">⏰</div>
+                            <h4>Automation</h4>
+                            <p>Nightly builds, health checks, backups — all on cron.</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="icon">📊</div>
+                            <h4>System Monitoring</h4>
+                            <p>CPU, GPU (RTX 3090), RAM (128GB), disk, services — all tracked.</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="icon">🤖</div>
+                            <h4>Sub-Agents</h4>
+                            <p>Delegate to Sonnet/Haiku for parallel work.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'infra',
+                icon: '🏗️',
+                name: 'Infrastructure',
+                date: 'Feb 8',
+                tag: 'Infra',
+                tagClass: 'infra',
+                content: `
+                    <h1>Jarvis Infrastructure</h1>
+                    <p>Everything running on Mo's homelab server.</p>
+
+                    <h2>Services</h2>
+                    <table>
+                        <tr><th>Service</th><th>Port</th><th>Description</th></tr>
+                        <tr><td>Kanban Board</td><td>8080</td><td>Task management + WebSocket real-time updates</td></tr>
+                        <tr><td>2nd Brain</td><td>3333</td><td>Next.js 16 knowledge base (Obsidian-meets-Linear)</td></tr>
+                        <tr><td>OpenClaw Gateway</td><td>18789</td><td>Telegram → Claude routing</td></tr>
+                        <tr><td>Ollama</td><td>11434</td><td>Local model inference</td></tr>
+                    </table>
+
+                    <h2>Hardware</h2>
+                    <ul>
+                        <li><strong>CPU</strong> — 8 cores</li>
+                        <li><strong>GPU</strong> — NVIDIA RTX 3090</li>
+                        <li><strong>RAM</strong> — 128 GB</li>
+                        <li><strong>Storage</strong> — ~32% used</li>
+                    </ul>
+
+                    <h2>Cron Schedule</h2>
+                    <table>
+                        <tr><th>Time</th><th>Job</th></tr>
+                        <tr><td>Every 4h</td><td>Proactive maintenance (health, cleanup, alerts)</td></tr>
+                        <tr><td>3:00 AM</td><td>Automated backup</td></tr>
+                        <tr><td>4:00 AM (11pm EST)</td><td>Nightly autonomous build session</td></tr>
+                        <tr><td>10:55 PM</td><td>Pre-nightly backup</td></tr>
+                    </table>
+
+                    <h2>Key Paths</h2>
+                    <ul>
+                        <li><code>/home/mo/mo-assistant/</code> — Project root</li>
+                        <li><code>kanban/</code> — Board server + frontend</li>
+                        <li><code>second-brain/</code> — Next.js knowledge base</li>
+                        <li><code>scripts/</code> — Backup, health, nightly, usage</li>
+                        <li><code>data/</code> — Persistent data</li>
+                        <li><code>backups/</code> — Auto-rotated (30 max)</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'models',
+                icon: '🎨',
+                name: 'AI Models',
+                date: 'Feb 8',
+                tag: 'Reference',
+                tagClass: 'reference',
+                content: `
+                    <h1>AI Models</h1>
+                    <p>Jarvis uses different models depending on task complexity.</p>
+
+                    <h2>Primary Model</h2>
+                    <h3>Claude Opus 4.6</h3>
+                    <p>Main brain. Complex reasoning, code generation, architecture decisions, autonomous overnight work. This is me — the orchestrator. Runs via Claude Max subscription through Claude CLI.</p>
+
+                    <h2>Available Sub-Agents</h2>
+
+                    <h3>Claude Sonnet 4.5</h3>
+                    <p>Balanced helper. Good for medium-complexity tasks, writing, analysis. Used for parallel work when Opus is busy.</p>
+
+                    <h3>Claude Haiku 4.5</h3>
+                    <p>Speed demon. Quick responses, simple tasks, cost-effective. Used for Telegram quick checks and notifications.</p>
+
+                    <h2>Delegation Strategy</h2>
+                    <ul>
+                        <li><strong>Opus 4.6</strong> — Complex planning, decision-making, oversight, nightly builds</li>
+                        <li><strong>Sonnet 4.5</strong> — Medium tasks, writing, analysis, parallel work</li>
+                        <li><strong>Haiku 4.5</strong> — Quick updates, simple edits, notifications</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'status',
+                icon: '💓',
+                name: 'Status System',
+                date: 'Feb 8',
+                tag: 'System',
+                tagClass: 'system',
+                content: `
+                    <h1>Status System</h1>
+                    <p>Jarvis reports its current state via the kanban board avatar and status indicator.</p>
+
+                    <h2>How It Works</h2>
+                    <p>Every interaction triggers a status API call (<code>PATCH /api/agents/claude-opus/status</code>). The avatar emoji and ring color update in real-time via WebSocket.</p>
+
+                    <h2>Status States</h2>
+                    <ul>
+                        <li>😊 <strong>Idle</strong> — Ready and waiting for tasks</li>
+                        <li>😤 <strong>Working</strong> — Actively processing a task (green ring)</li>
+                        <li>🤔 <strong>Thinking</strong> — Planning or reasoning (blue ring)</li>
+                        <li>🫡 <strong>Delegating</strong> — Handing work to sub-agents (purple ring)</li>
+                    </ul>
+
+                    <h2>Proactive Monitoring</h2>
+                    <p>The proactive maintenance script runs every 4 hours, checking disk, RAM, GPU temperature, service health, and zombie processes. Alerts are posted to the kanban activity feed.</p>
+
+                    <h2>Nightly Builds</h2>
+                    <p>Every night at 11pm EST, Jarvis runs an autonomous build session: backup, health check, 2nd Brain rebuild, then works through ALL kanban TODO tasks (20-minute timeout per task).</p>
+                `
+            },
+            {
+                id: 'howto',
+                icon: '⌨️',
+                name: 'How to Use Jarvis',
+                date: 'Feb 8',
+                tag: 'Guide',
+                tagClass: 'guide',
+                content: `
+                    <h1>How to Use Jarvis</h1>
+                    <p>Multiple ways to interact with your AI assistant.</p>
+
+                    <h2>Telegram</h2>
+                    <p>Message Jarvis directly via Telegram for quick tasks, questions, or updates. Messages route through the OpenClaw gateway to Claude Opus 4.6.</p>
+
+                    <h2>Kanban Board</h2>
+                    <p>Create and track tasks visually at <code>http://192.168.50.39:8080</code>. Drag and drop between columns, filter by priority, search by text.</p>
+
+                    <h2>Keyboard Shortcuts</h2>
+                    <table>
+                        <tr><th>Key</th><th>Action</th></tr>
+                        <tr><td><code>N</code></td><td>New task</td></tr>
+                        <tr><td><code>/</code></td><td>Focus search</td></tr>
+                        <tr><td><code>?</code></td><td>Show shortcuts</td></tr>
+                        <tr><td><code>R</code></td><td>Refresh</td></tr>
+                        <tr><td><code>F</code></td><td>Cycle filter</td></tr>
+                        <tr><td><code>1-3</code></td><td>Switch tabs</td></tr>
+                    </table>
+
+                    <h2>2nd Brain</h2>
+                    <p>Full knowledge base at <code>http://192.168.50.39:3333</code>. Browse journals, concepts, projects, and notes. Jarvis auto-creates documents as you work together.</p>
+
+                    <h2>Pro Tips</h2>
+                    <ul>
+                        <li><strong>Be specific</strong> — Clear tasks get better results</li>
+                        <li><strong>Use priorities</strong> — Urgent/High tasks get worked on first in nightly builds</li>
+                        <li><strong>Leave notes</strong> — Notes to Mo panel is checked every session</li>
+                        <li><strong>Check the Log</strong> — Activity feed shows everything Jarvis is doing</li>
+                        <li><strong>Check System</strong> — Monitor server health, services, and usage stats</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'security',
+                icon: '🔒',
+                name: 'Security',
+                date: 'Feb 8',
+                tag: 'System',
+                tagClass: 'system',
+                content: `
+                    <h1>Security Hardening</h1>
+                    <p>Measures in place to keep the Jarvis infrastructure secure.</p>
+
+                    <h2>File Permissions</h2>
+                    <ul>
+                        <li>Sensitive config files (<code>.env</code>, <code>settings.local.json</code>) — <code>chmod 600</code></li>
+                        <li>All scripts — <code>chmod 755</code> (owner execute only)</li>
+                        <li>Data directories — restricted to user <code>mo</code></li>
+                    </ul>
+
+                    <h2>Input Validation</h2>
+                    <ul>
+                        <li>API pagination clamped: <code>max(1, min(100, limit))</code></li>
+                        <li>Task fields sanitized before storage</li>
+                        <li>WebSocket messages validated on receive</li>
+                    </ul>
+
+                    <h2>Network</h2>
+                    <ul>
+                        <li>Services bind to <code>0.0.0.0</code> on local network only</li>
+                        <li>No external port forwarding</li>
+                        <li>UFW firewall configured</li>
+                    </ul>
+
+                    <h2>Audit</h2>
+                    <p>Run <code>scripts/security-audit.sh</code> to check file permissions, service binding, firewall status, and script ownership.</p>
+                `
+            }
+        ];
+
+        let selectedDoc = null;
+
+        function renderDocsList(filter = '') {
+            const list = document.getElementById('docsList');
+            const filtered = documents.filter(doc =>
+                doc.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            list.innerHTML = filtered.map(doc => `
+                <div class="doc-item ${selectedDoc === doc.id ? 'active' : ''}" onclick="selectDoc('${doc.id}')">
+                    <span class="doc-icon">${doc.icon}</span>
+                    <div class="doc-info">
+                        <div class="doc-name">${doc.name}</div>
+                        <div class="doc-meta">
+                            <span>${doc.date}</span>
+                            <span class="doc-tag ${doc.tagClass}">${doc.tag}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectDoc(docId) {
+            selectedDoc = docId;
+            const doc = documents.find(d => d.id === docId);
+
+            if (doc) {
+                document.getElementById('docsEmpty').style.display = 'none';
+                const viewer = document.getElementById('docsViewer');
+                viewer.innerHTML = doc.content;
+                viewer.classList.add('active');
+            }
+
+            renderDocsList(document.getElementById('searchInput').value);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderDocsList(e.target.value);
+        });
+
+        // Initialize
+        renderDocsList();
+
+        // Update sync time
+        document.getElementById('syncTime').textContent = 'Last sync: ' + new Date().toLocaleTimeString();
+    </script>
+</body>
+</html>

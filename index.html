@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis Command Center</title>
+    <link rel="stylesheet" href="style.css?v=20">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar" id="leftSidebar">
+            <div class="sidebar-resize-handle" id="sidebarResizeHandle"></div>
+            <div class="agent-profile">
+                <div class="avatar-container" id="avatarContainer">
+                    <div class="avatar" id="agentAvatar">🤖</div>
+                    <span class="avatar-ring" id="avatarRing"></span>
+                </div>
+                <h2 class="agent-name">Jarvis</h2>
+                <div class="status-indicator" id="mainStatus">
+                    <span class="status-dot idle"></span>
+                    <span class="status-text">Idle</span>
+                </div>
+                <div class="metrics-display" id="metricsDisplay">
+                    <div class="metrics-provider" id="metricsProvider">🔌 --</div>
+                    <div class="metrics-model" id="metricsModel">🧠 --</div>
+                </div>
+                <button class="ready-btn" id="readyBtn">Ready for tasks</button>
+            </div>
+
+            <div class="helpers-section">
+                <div class="helpers-header">
+                    <h3>Helpers at work</h3>
+                    <span class="helpers-badge" id="helpersCount">0</span>
+                </div>
+                <div class="helpers-list" id="helpersList">
+                    <!-- Sub-agents will appear here -->
+                </div>
+                
+                <div class="sidebar-notes-section">
+                    <div class="sidebar-notes-header">
+                        <h3>Notes to Mo</h3>
+                        <span class="notes-count sidebar-notes-count" id="sidebarNotesCount">0</span>
+                    </div>
+                    <div class="sidebar-notes-list" id="sidebarNotesList">
+                        <!-- Notes will appear here -->
+                    </div>
+                    <div class="sidebar-notes-input-area">
+                        <textarea class="sidebar-notes-input" id="sidebarNotesInput" placeholder="Leave a note..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addSidebarNote()}"></textarea>
+                        <button class="sidebar-add-note-btn" onclick="addSidebarNote()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-area">
+            <!-- Top Navigation -->
+            <nav class="top-nav">
+                <div class="nav-left">
+                    <div class="agent-header">
+                        <span class="agent-title">Jarvis</span>
+                        <span class="status-dot-small idle" id="navStatusDot"></span>
+                    </div>
+                    <div class="nav-tabs">
+                        <a href="#" class="nav-tab active" data-tab="dashboard">Dashboard</a>
+                        <a href="#" class="nav-tab" data-tab="system">System</a>
+                        <a href="#" class="nav-tab" data-tab="history">History</a>
+                        <a href="/docs.html" class="nav-tab">Docs</a>
+                        <a href="#" class="nav-tab" data-tab="log">Log</a>
+                        <a href="#" class="nav-tab" data-tab="feed">Live Feed</a>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <span class="sync-status" id="syncStatus">Last sync: --:--</span>
+                    <span class="connection-dot" id="connectionDot"></span>
+                    <button class="logout-btn" title="Settings">⚙️</button>
+                </div>
+            </nav>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Kanban Board -->
+                <div class="kanban-wrapper">
+                    <div class="kanban-header">
+                        <div class="filter-bar" id="filterBar">
+                            <input type="text" class="filter-search" id="filterSearch" placeholder="Filter tasks... (/ to focus)" />
+                            <div class="filter-pills">
+                                <button class="filter-pill active" data-priority="all" onclick="setFilter('all')">All</button>
+                                <button class="filter-pill" data-priority="urgent" onclick="setFilter('urgent')">🔴 Urgent</button>
+                                <button class="filter-pill" data-priority="high" onclick="setFilter('high')">🟠 High</button>
+                                <button class="filter-pill" data-priority="medium" onclick="setFilter('medium')">🟡 Medium</button>
+                                <button class="filter-pill" data-priority="low" onclick="setFilter('low')">🟢 Low</button>
+                            </div>
+                            <span class="filter-hint">? for shortcuts</span>
+                        </div>
+                    </div>
+                    <div class="kanban-board" id="kanbanBoard">
+                        <div class="kanban-column backlog-column" data-status="backlog">
+                            <div class="column-header">
+                                <span class="column-dot backlog"></span>
+                                <h3>BACKLOG</h3>
+                                <span class="task-count" id="count-backlog">0</span>
+                            </div>
+                            <div class="add-task-btn" onclick="openQuickAdd('backlog')">+</div>
+                            <div class="task-list" id="tasks-backlog"></div>
+                        </div>
+                        <div class="kanban-column" data-status="todo">
+                            <div class="column-header">
+                                <span class="column-dot todo"></span>
+                                <h3>TO DO</h3>
+                                <span class="task-count" id="count-todo">0</span>
+                            </div>
+                            <div class="add-task-btn" onclick="openQuickAdd('todo')">+</div>
+                            <div class="task-list" id="tasks-todo"></div>
+                        </div>
+                        <div class="kanban-column" data-status="in-progress">
+                            <div class="column-header">
+                                <span class="column-dot in-progress"></span>
+                                <h3>IN PROGRESS</h3>
+                                <span class="task-count" id="count-in-progress">0</span>
+                            </div>
+                            <div class="add-task-btn" onclick="openQuickAdd('in-progress')">+</div>
+                            <div class="task-list" id="tasks-in-progress"></div>
+                        </div>
+                        <div class="kanban-column" data-status="done">
+                            <div class="column-header">
+                                <span class="column-dot done"></span>
+                                <h3>DONE</h3>
+                                <span class="task-count" id="count-done">0</span>
+                            </div>
+                            <div class="add-task-btn" onclick="openQuickAdd('done')">+</div>
+                            <div class="task-list" id="tasks-done"></div>
+                        </div>
+                        <div class="kanban-column archive-column" data-status="archive">
+                            <div class="column-header">
+                                <span class="column-dot archive"></span>
+                                <h3>ARCHIVE</h3>
+                                <span class="task-count" id="count-archive">0</span>
+                            </div>
+                            <div class="task-list" id="tasks-archive"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Panels -->
+                <div class="bottom-panels">
+                    <!-- Scheduled Deliverables -->
+                    <div class="panel scheduled-panel">
+                        <div class="panel-header">
+                            <span class="panel-dot scheduled"></span>
+                            <h3>Scheduled Deliverables</h3>
+                        </div>
+                        <div class="scheduled-list" id="scheduledList">
+                            <!-- Scheduled items go here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- System Monitor Content (hidden by default) -->
+            <div class="system-content" id="systemContent" style="display: none;">
+                <div class="system-grid">
+                    <!-- CPU -->
+                    <div class="system-card">
+                        <div class="system-card-header">
+                            <span class="system-icon">🖥️</span>
+                            <span class="system-label">CPU</span>
+                        </div>
+                        <div class="system-value" id="sysCpuUsage">--</div>
+                        <div class="system-bar"><div class="system-bar-fill cpu" id="sysCpuBar"></div></div>
+                        <div class="system-detail" id="sysCpuDetail">-- cores · Load: --</div>
+                    </div>
+                    <!-- Memory -->
+                    <div class="system-card">
+                        <div class="system-card-header">
+                            <span class="system-icon">🧠</span>
+                            <span class="system-label">Memory</span>
+                        </div>
+                        <div class="system-value" id="sysMemUsage">--</div>
+                        <div class="system-bar"><div class="system-bar-fill mem" id="sysMemBar"></div></div>
+                        <div class="system-detail" id="sysMemDetail">-- / -- GB</div>
+                    </div>
+                    <!-- Disk -->
+                    <div class="system-card">
+                        <div class="system-card-header">
+                            <span class="system-icon">💾</span>
+                            <span class="system-label">Disk</span>
+                        </div>
+                        <div class="system-value" id="sysDiskUsage">--</div>
+                        <div class="system-bar"><div class="system-bar-fill disk" id="sysDiskBar"></div></div>
+                        <div class="system-detail" id="sysDiskDetail">-- / -- GB</div>
+                    </div>
+                    <!-- GPU -->
+                    <div class="system-card">
+                        <div class="system-card-header">
+                            <span class="system-icon">🎮</span>
+                            <span class="system-label">GPU</span>
+                        </div>
+                        <div class="system-value" id="sysGpuUsage">--</div>
+                        <div class="system-bar"><div class="system-bar-fill gpu" id="sysGpuBar"></div></div>
+                        <div class="system-detail" id="sysGpuDetail">--</div>
+                    </div>
+                    <!-- Uptime -->
+                    <div class="system-card">
+                        <div class="system-card-header">
+                            <span class="system-icon">⏱️</span>
+                            <span class="system-label">Uptime</span>
+                        </div>
+                        <div class="system-value" id="sysUptime">--</div>
+                        <div class="system-detail" id="sysUptimeDetail">Server uptime</div>
+                    </div>
+                    <!-- Services -->
+                    <div class="system-card">
+                        <div class="system-card-header">
+                            <span class="system-icon">🔌</span>
+                            <span class="system-label">Services</span>
+                        </div>
+                        <div class="services-grid" id="sysServices">
+                            <div class="service-item"><span class="service-dot" id="svcKanban"></span> Kanban</div>
+                            <div class="service-item"><span class="service-dot" id="svcBrain"></span> 2nd Brain</div>
+                            <div class="service-item"><span class="service-dot" id="svcOpenClaw"></span> OpenClaw</div>
+                            <div class="service-item"><span class="service-dot" id="svcOllama"></span> Ollama</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Top Processes -->
+                <div class="system-processes">
+                    <h3>Top Processes</h3>
+                    <div class="process-list" id="sysProcesses"></div>
+                </div>
+
+                <!-- Usage Stats -->
+                <div class="usage-stats">
+                    <h3>Usage & Activity</h3>
+                    <div class="usage-grid" id="usageGrid">
+                        <div class="usage-item">
+                            <span class="usage-icon">📋</span>
+                            <span class="usage-label">Subscription</span>
+                            <span class="usage-value" id="usagePlan">--</span>
+                        </div>
+                        <div class="usage-item">
+                            <span class="usage-icon">🧠</span>
+                            <span class="usage-label">Primary Model</span>
+                            <span class="usage-value" id="usageModel">--</span>
+                        </div>
+                        <div class="usage-item">
+                            <span class="usage-icon">⚡</span>
+                            <span class="usage-label">Active Sessions</span>
+                            <span class="usage-value" id="usageSessions">--</span>
+                        </div>
+                        <div class="usage-item">
+                            <span class="usage-icon">📊</span>
+                            <span class="usage-label">Activity Today</span>
+                            <span class="usage-value" id="usageActivity">--</span>
+                        </div>
+                        <div class="usage-item">
+                            <span class="usage-icon">🤖</span>
+                            <span class="usage-label">Active Agents</span>
+                            <span class="usage-value" id="usageAgents">--</span>
+                        </div>
+                        <div class="usage-item">
+                            <span class="usage-icon">📝</span>
+                            <span class="usage-label">2nd Brain Docs</span>
+                            <span class="usage-value" id="usageDocs">--</span>
+                        </div>
+                        <div class="usage-item">
+                            <span class="usage-icon">💾</span>
+                            <span class="usage-label">Backups</span>
+                            <span class="usage-value" id="usageBackups">--</span>
+                        </div>
+                        <div class="usage-item">
+                            <span class="usage-icon">⏰</span>
+                            <span class="usage-label">Cron Jobs</span>
+                            <span class="usage-value" id="usageCron">--</span>
+                        </div>
+                    </div>
+                    <!-- Task breakdown -->
+                    <div class="task-breakdown" id="taskBreakdown">
+                        <div class="task-stat"><span class="task-stat-dot todo"></span> TODO <span id="usageTodo">0</span></div>
+                        <div class="task-stat"><span class="task-stat-dot progress"></span> In Progress <span id="usageProgress">0</span></div>
+                        <div class="task-stat"><span class="task-stat-dot done"></span> Done <span id="usageDone">0</span></div>
+                        <div class="task-stat"><span class="task-stat-dot archive"></span> Archive <span id="usageArchive">0</span></div>
+                    </div>
+                </div>
+
+                <div class="system-footer">
+                    <span id="sysLastUpdate">Last update: --</span>
+                    <span>Auto-refresh: 10s</span>
+                </div>
+            </div>
+
+            <!-- History Content (hidden by default) -->
+            <div class="history-content" id="historyContent" style="display: none;">
+                <div class="history-stats-bar" id="historyStatsBar">
+                    <div class="history-stat-card">
+                        <span class="history-stat-value" id="histStatTotal">--</span>
+                        <span class="history-stat-label">Total Completed</span>
+                    </div>
+                    <div class="history-stat-card">
+                        <span class="history-stat-value" id="histStatThisWeek">--</span>
+                        <span class="history-stat-label">This Week</span>
+                    </div>
+                    <div class="history-stat-card">
+                        <span class="history-stat-value" id="histStatLastWeek">--</span>
+                        <span class="history-stat-label">Last Week</span>
+                    </div>
+                    <div class="history-stat-card">
+                        <span class="history-stat-value" id="histStatAvgTime">--</span>
+                        <span class="history-stat-label">Avg Completion</span>
+                    </div>
+                </div>
+                <div class="history-filters-bar">
+                    <input type="text" class="history-search" id="historySearch" placeholder="Search tasks..." />
+                    <input type="text" class="history-agent-filter" id="historyAgentFilter" placeholder="Filter by agent..." />
+                    <input type="date" class="history-date" id="historyDateFrom" title="From date" />
+                    <input type="date" class="history-date" id="historyDateTo" title="To date" />
+                    <select class="history-status-filter" id="historyStatusFilter">
+                        <option value="done,archive">All Completed</option>
+                        <option value="done">Done Only</option>
+                        <option value="archive">Archived Only</option>
+                    </select>
+                    <button class="history-search-btn" onclick="loadHistory()">Search</button>
+                </div>
+                <div class="history-weeks" id="historyWeeks">
+                    <div class="history-loading">Loading history...</div>
+                </div>
+            </div>
+
+            <!-- Log Content (hidden by default) -->
+            <div class="log-content" id="logContent" style="display: none;">
+                <div class="log-header">
+                    <h3>Activity Log</h3>
+                    <span class="log-count" id="logCount">0 entries</span>
+                </div>
+                <div class="activity-feed" id="activityFeed"></div>
+            </div>
+
+            <!-- Live Feed Content (hidden by default) -->
+            <div class="feed-content" id="feedContent" style="display: none;">
+                <div class="feed-header">
+                    <h3>Live Feed</h3>
+                    <div class="feed-header-right">
+                        <span class="feed-count" id="feedCount">0 entries</span>
+                        <button class="feed-clear-btn" onclick="clearFeed()" title="Clear all entries">Clear</button>
+                    </div>
+                </div>
+                <div class="feed-container" id="feedContainer"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- New Task Modal -->
+    <div class="modal" id="newTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>New Task</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="newTaskForm" onsubmit="createTask(event)">
+                <div class="form-group">
+                    <label for="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" required placeholder="What needs to be done?">
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description (optional)</label>
+                    <textarea id="taskDescription" rows="3" placeholder="Details, context, requirements..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority">
+                            <option value="low">🟢 Low</option>
+                            <option value="medium" selected>🟡 Medium</option>
+                            <option value="high">🟠 High</option>
+                            <option value="urgent">🔴 Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskModel">Assign Model</label>
+                        <select id="taskModel">
+                            <option value="auto">🤖 Auto-route</option>
+                            <option value="claude-haiku-4.5">⚡ Haiku (fast)</option>
+                            <option value="claude-sonnet-4.5">✍️ Sonnet</option>
+                            <option value="gpt-5.2-codex">💻 Codex</option>
+                            <option value="claude-opus-4.5">🎯 Opus</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="taskAgent">Assign Agent</label>
+                    <select id="taskAgent">
+                        <option value="">None (manual)</option>
+                        <option value="Agent: Code">🖥️ Code Agent</option>
+                        <option value="Agent: Research">🔍 Research Agent</option>
+                        <option value="Agent: DevOps">⚙️ DevOps Agent</option>
+                        <option value="Agent: Review">📋 Review Agent</option>
+                        <option value="Agent: Design">🎨 Design Agent</option>
+                        <option value="Agent: Data">📊 Data Agent</option>
+                    </select>
+                </div>
+                <input type="hidden" id="taskStatus" value="todo">
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div class="modal" id="taskDetailModal">
+        <div class="modal-content task-detail-content">
+            <div class="modal-header">
+                <input type="text" class="detail-title-input" id="detailTitle" value="Task Title">
+                <button class="modal-close" onclick="closeTaskDetail()">&times;</button>
+            </div>
+            <div class="task-detail-body">
+                <div class="detail-section">
+                    <label>Description</label>
+                    <textarea class="detail-description-input" id="detailDescription" rows="3" placeholder="No description"></textarea>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <label>Status</label>
+                        <select id="detailStatus" onchange="updateTaskFromDetail()">
+                            <option value="backlog">Backlog</option>
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="done">Done</option>
+                            <option value="archive">Archive</option>
+                        </select>
+                    </div>
+                    <div class="detail-item">
+                        <label>Priority</label>
+                        <select id="detailPriority" onchange="updateTaskFromDetail()">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="detail-item">
+                        <label>Model</label>
+                        <span id="detailModel">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Agent</label>
+                        <span id="detailAgent">—</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <label>Output</label>
+                    <div class="task-output" id="detailOutput">
+                        <em>No output yet...</em>
+                    </div>
+                </div>
+                <div class="detail-actions">
+                    <button class="btn-danger" onclick="deleteTask()">Delete</button>
+                    <button class="btn-secondary" onclick="archiveTask()">Archive</button>
+                    <button class="btn-primary" onclick="saveTaskFromDetail()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=20"></script>
+</body>
+</html>

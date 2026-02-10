@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis — Memory</title>
+    <link rel="stylesheet" href="memory.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="nav-brand">
+                <span class="brand-icon">🧠</span>
+                <span class="brand-title">Jarvis Memory</span>
+            </div>
+            <div class="nav-tabs">
+                <a href="/" class="nav-tab">Dashboard</a>
+                <a href="/" class="nav-tab" onclick="localStorage.setItem('jarvis-tab','system')">System</a>
+                <a href="/docs.html" class="nav-tab">Docs</a>
+                <a href="/memory.html" class="nav-tab active">Memory</a>
+                <a href="/" class="nav-tab" onclick="localStorage.setItem('jarvis-tab','log')">Log</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <span class="refresh-status" id="refreshStatus">Last refresh: --:--</span>
+            <button class="refresh-btn" id="refreshBtn" title="Refresh">&#8635;</button>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <!-- Stats Cards Row -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+                <div class="stat-value" id="statFacts">--</div>
+                <div class="stat-label">Facts Stored</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statGoals">--</div>
+                <div class="stat-label">Goals Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statConversations">--</div>
+                <div class="stat-label">Conversations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statConvToday">--</div>
+                <div class="stat-label">Messages Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statPreferences">--</div>
+                <div class="stat-label">Preferences</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statDbSize">--</div>
+                <div class="stat-label">Database Size</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+            <!-- Conversation History Chart -->
+            <div class="chart-panel">
+                <div class="panel-title">Conversations (Last 30 Days)</div>
+                <div class="chart-container" id="convChart"></div>
+            </div>
+
+            <!-- Facts by Category -->
+            <div class="chart-panel">
+                <div class="panel-title">Facts by Category</div>
+                <div class="category-bars" id="categoryBars"></div>
+            </div>
+        </div>
+
+        <!-- Data Tables Row -->
+        <div class="tables-row">
+            <!-- Goals -->
+            <div class="table-panel">
+                <div class="panel-title">
+                    Goals
+                    <div class="goal-filters" id="goalFilters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="active">Active</button>
+                        <button class="filter-btn" data-filter="completed">Done</button>
+                    </div>
+                </div>
+                <div class="table-scroll" id="goalsTable"></div>
+            </div>
+
+            <!-- Recent Facts -->
+            <div class="table-panel">
+                <div class="panel-title">
+                    Recent Facts
+                    <div class="facts-nav">
+                        <button class="page-btn" id="factsPrev" disabled>&laquo;</button>
+                        <span class="page-info" id="factsPageInfo">1 / 1</span>
+                        <button class="page-btn" id="factsNext">&raquo;</button>
+                    </div>
+                </div>
+                <div class="table-scroll" id="factsTable"></div>
+            </div>
+        </div>
+
+        <!-- Recent Conversations -->
+        <div class="conv-panel">
+            <div class="panel-title">
+                Recent Conversations
+                <select class="days-select" id="convDays">
+                    <option value="1">Last 24h</option>
+                    <option value="3">Last 3 days</option>
+                    <option value="7" selected>Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                </select>
+            </div>
+            <div class="conv-list" id="convList"></div>
+        </div>
+    </div>
+
+    <script src="memory-app.js"></script>
+</body>
+</html>
